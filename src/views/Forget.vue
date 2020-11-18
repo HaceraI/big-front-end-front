@@ -91,26 +91,28 @@
                     v-slot="{ errors }"
                   >
                     <div class="layui-form-item">
-                      <label for="L_vercode" class="layui-form-label"
-                        >验证码</label
-                      >
-                      <div class="layui-input-inline">
-                        <input
-                          type="text"
-                          id="L_vercode"
-                          name="vercode"
-                          v-model="captcha"
-                          placeholder="请输入验证码"
-                          autocomplete="off"
-                          class="layui-input"
-                        />
+                      <div class="layui-row">
+                        <label for="L_vercode" class="layui-form-label"
+                          >验证码</label
+                        >
+                        <div class="layui-input-inline">
+                          <input
+                            type="text"
+                            id="L_vercode"
+                            name="vercode"
+                            v-model="captcha"
+                            placeholder="请输入验证码"
+                            autocomplete="off"
+                            class="layui-input"
+                          />
+                        </div>
+                        <span
+                          style="color: #c00"
+                          class="captcha"
+                          @click="_getCaptcha()"
+                          v-html="svg"
+                        ></span>
                       </div>
-                      <span
-                        style="color: #c00"
-                        class="captcha"
-                        @click="_getCaptcha()"
-                        v-html="svg"
-                      ></span>
                       <transition name="fade">
                         <div
                           class="layui-form-mid validate-err-msg"
@@ -173,11 +175,15 @@ export default {
      * 获取图形验证码
      */
     _getCaptcha() {
-      getCaptcha().then((res) => {
-        if (res.code === 200) {
-          this.svg = res.data;
-        }
-      });
+      getCaptcha()
+        .then((res) => {
+          if (res.code === 200) {
+            this.svg = res.data;
+          }
+        })
+        .error(() => {
+          console.log("请求服务器资源发生异常...");
+        });
     },
   },
 };
