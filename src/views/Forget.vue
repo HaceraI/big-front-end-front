@@ -175,15 +175,11 @@ export default {
      * 获取图形验证码
      */
     _getCaptcha() {
-      getCaptcha()
-        .then((res) => {
-          if (res.code === 200) {
-            this.svg = res.data;
-          }
-        })
-        .error(() => {
-          console.log("请求服务器资源发生异常...");
-        });
+      getCaptcha().then((res) => {
+        if (res.code === 200) {
+          this.svg = res.data;
+        }
+      });
     },
   },
 };
