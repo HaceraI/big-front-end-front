@@ -53,7 +53,7 @@
                   </ValidationProvider>
                   <ValidationProvider
                     name="userNick"
-                    rules="required"
+                    rules="required|min:4"
                     v-slot="{ errors }"
                   >
                     <div class="layui-form-item">

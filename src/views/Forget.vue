@@ -124,7 +124,7 @@
                     </div>
                   </ValidationProvider>
                   <div class="layui-form-item">
-                    <button class="layui-btn" alert="1">提交</button>
+                    <button class="layui-btn" alert="1" @click="submitForget()">提交</button>
                   </div>
                 </form>
               </ValidationObserver>
@@ -139,7 +139,7 @@
 <script>
 import { extend } from "vee-validate";
 import { required, length } from "vee-validate/dist/rules";
-import { getCaptcha } from "@/api/login";
+import { getCaptcha, forget } from "@/api/login";
 
 extend("required", {
   ...required,
@@ -181,6 +181,16 @@ export default {
         }
       });
     },
+    submitForget() {
+      forget({
+        userAccount: this.userAccount,
+        code: this.captcha
+      }).then((res) => {
+        if (res.code === 200) {
+          alert('邮件发送成功')
+        }
+      })
+    }
   },
 };
 </script>
