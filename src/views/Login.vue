@@ -13,8 +13,8 @@
         >
           <div class="layui-tab-item layui-show">
             <div class="layui-form layui-form-pane">
-              <ValidationObserver ref="form">
-                <form method="post">
+              <ValidationObserver ref="loginForm" v-slot="{ handleSubmit }">
+                <form method="post" @submit.prevent="handleSubmit(login)">
                   <!-- 用户名 -->
                   <ValidationProvider
                     name="userName"
@@ -120,7 +120,7 @@
                     </div>
                   </ValidationProvider>
                   <div class="layui-form-item">
-                    <button class="layui-btn">立即登录</button>
+                    <button class="layui-btn" type="submit">立即登录</button>
                     <span style="padding-left: 20px">
                       <router-link :to="{ name: 'forget' }"
                         >忘记密码？</router-link
@@ -156,6 +156,7 @@
 import { extend } from "vee-validate";
 import { required, min, length } from "vee-validate/dist/rules";
 import { getCaptcha } from "@/api/login";
+import { v4 as uuidv4 } from "uuid";
 
 extend("required", {
   ...required,
@@ -188,6 +189,15 @@ export default {
     };
   },
   mounted() {
+    let sid;
+    if (localStorage.getItem("sid")) {
+      sid = localStorage.getItem("sid");
+    } else {
+      sid = uuidv4();
+      localStorage.setItem("sid", sid);
+    }
+    this.$store.commit("setSid", sid);
+    console.log(sid);
     // 获取图形验证码
     this._getCaptcha();
   },
@@ -196,12 +206,20 @@ export default {
      * 获取图片验证码
      */
     _getCaptcha() {
-      getCaptcha().then((res) => {
+      const sid = this.$store.state.sid;
+
+      getCaptcha(sid).then((res) => {
         console.log(res);
         if (res.code === 200) {
           this.svg = res.data;
         }
       });
+    },
+    /**
+     * 用户登录
+     */
+    login() {
+      console.log("ewewwe");
     },
   },
 };

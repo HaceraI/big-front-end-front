@@ -1,6 +1,10 @@
 import Vue from "vue";
-import { ValidationObserver, ValidationProvider, localize } from 'vee-validate'
-import './local/index'
+import {
+  ValidationObserver,
+  ValidationProvider,
+  localize
+} from 'vee-validate'
+import '../local/index'
 
 // install rules and localization
 // Object.keys(rules).forEach(rule => {
@@ -26,4 +30,3 @@ Object.defineProperty(Vue.prototype, "locale", {
     localize(val);
   }
 });
-
