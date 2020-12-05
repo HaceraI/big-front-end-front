@@ -13,8 +13,8 @@
         >
           <div class="layui-tab-item layui-show">
             <div class="layui-form layui-form-pane">
-              <ValidationObserver ref="form">
-                <form method="post">
+              <ValidationObserver ref="form" v-slot="{ handleSubmit }">
+                <form method="post" @submit.prevent="handleSubmit(reg)">
                   <ValidationProvider
                     name="userName"
                     rules="required|userAccount"
@@ -53,7 +53,7 @@
                   </ValidationProvider>
                   <ValidationProvider
                     name="userNick"
-                    rules="required|min:4"
+                    rules="required|min:4|userNick"
                     v-slot="{ errors }"
                   >
                     <div class="layui-form-item">
@@ -194,7 +194,7 @@
                     </div>
                   </ValidationProvider>
                   <div class="layui-form-item">
-                    <button class="layui-btn">立即注册</button>
+                    <button class="layui-btn" type="submit">立即注册</button>
                   </div>
                   <div class="layui-form-item fly-form-app">
                     <span>或者直接使用社交账号快捷注册</span>
@@ -251,6 +251,13 @@ extend("userAccount", (value) => {
   }
   return "请输入正确的用户名格式类型(手机号或邮箱)";
 });
+extend("userNick", (value) => {
+  // 验证用户昵称是否是纯数字
+  if (isNaN(value)) {
+    return true;
+  }
+  return "昵称不能为纯数字";
+})
 
 export default {
   name: "reg",
@@ -265,19 +272,22 @@ export default {
     };
   },
   mounted() {
-    this._getCapthcha();
+    this._getCaptcha();
   },
   methods: {
     /**
      * 获取图片验证码
      */
-    _getCapthcha() {
+    _getCaptcha() {
       getCaptcha().then((res) => {
         if (res.code === 200) {
           this.svg = res.data;
         }
       });
     },
+    reg() {
+      console.log("test.")
+    }
   },
 };
 </script>
