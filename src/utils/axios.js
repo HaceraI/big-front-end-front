@@ -13,7 +13,8 @@ class HttpRequest {
       baseURL: this.baseUrl,
       timeout: 10000,
       headers: {
-        'Content-Type': 'application/json;charset=utf-8'
+        'Content-Type': 'application/json;charset=utf-8',
+        'content-type': 'application/json;charset=utf-8'
       }
     };
     return config;

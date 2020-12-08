@@ -1,7 +1,7 @@
 <template>
   <div class="layui-container fly-marginTop">
     <div class="fly-panel fly-panel-user" pad20>
-      <div class="layui-tab layui-tab-brief" lay-filter="user">
+      <div class="layui-tab layui-tab-brief">
         <ul class="layui-tab-title">
           <li class="layui-this">登入</li>
           <li><router-link :to="{ name: 'reg' }">注册</router-link></li>
@@ -81,6 +81,7 @@
 
                   <!-- 验证码 -->
                   <ValidationProvider
+                    vid="captchaProvider"
                     name="captcha"
                     rules="required|length:5"
                     v-slot="{ errors }"
@@ -155,7 +156,7 @@
 <script>
 import { extend } from "vee-validate";
 import { required, min, length } from "vee-validate/dist/rules";
-import { getCaptcha } from "@/api/login";
+import { getCaptcha, login } from "@/api/login";
 import { v4 as uuidv4 } from "uuid";
 
 extend("required", {
@@ -197,7 +198,6 @@ export default {
       localStorage.setItem("sid", sid);
     }
     this.$store.commit("setSid", sid);
-    console.log(sid);
     // 获取图形验证码
     this._getCaptcha();
   },
@@ -209,17 +209,51 @@ export default {
       const sid = this.$store.state.sid;
 
       getCaptcha(sid).then((res) => {
-        console.log(res);
         if (res.code === 200) {
           this.svg = res.data;
+        } else {
+          this.$alert(res.msg);
+        }
+      }).catch(err => {
+        let data = err.response.data;
+        if (data && data.msg) {
+          this.$alert(data.msg);
+        } else {
+          this.$alert("系统发生错误，请稍后重试或联系管理员.")
         }
       });
     },
     /**
      * 用户登录
      */
-    login() {
-      console.log("ewewwe");
+    async login() {
+      let isValid = await this.$refs.loginForm.validate();
+      if (!isValid) {
+        return;
+      }
+      let data = {
+        userName: this.name,
+        password: this.password,
+        code: this.code
+      };
+      login(this.$store.state.sid, data).then((res) => {
+        if (res.code === 200) {
+          console.log('登录成功');
+        } else if (res.code === -3) {
+          this.$refs.loginForm.setErrors({
+            captchaProvider: [res.msg]
+          });
+        } else {
+          this.$alert(res.msg);
+        }
+      }).catch(err => {
+        let data = err.response.data;
+        if (data && data.msg) {
+          this.$alert(data.msg);
+        } else {
+          this.$alert("系统发生错误，请稍后重试或联系管理员.")
+        }
+      });
     },
   },
 };

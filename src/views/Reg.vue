@@ -13,9 +13,10 @@
         >
           <div class="layui-tab-item layui-show">
             <div class="layui-form layui-form-pane">
-              <ValidationObserver ref="form" v-slot="{ handleSubmit }">
+              <ValidationObserver ref="regForm" v-slot="{ handleSubmit }">
                 <form method="post" @submit.prevent="handleSubmit(reg)">
                   <ValidationProvider
+                    vid="userNameProvider"
                     name="userName"
                     rules="required|userAccount"
                     v-slot="{ errors }"
@@ -52,6 +53,7 @@
                     </div>
                   </ValidationProvider>
                   <ValidationProvider
+                    vid="userNickProvider"
                     name="userNick"
                     rules="required|min:4|userNick"
                     v-slot="{ errors }"
@@ -136,7 +138,7 @@
                             type="password"
                             id="L_repass"
                             name="repassword"
-                            v-model="repassword"
+                            v-model="rePassword"
                             :class="{ 'validate-err-input': errors[0] }"
                             placeholder="请输入密码"
                             autocomplete="off"
@@ -155,6 +157,7 @@
                     </div>
                   </ValidationProvider>
                   <ValidationProvider
+                    vid="captchaProvider"
                     name="captcha"
                     rules="required|length:5"
                     v-slot="{ errors }"
@@ -224,7 +227,7 @@
 <script>
 import { extend } from "vee-validate";
 import { required, min, length, max, confirmed } from "vee-validate/dist/rules";
-import { getCaptcha } from "@/api/login";
+import { getCaptcha, reg } from "@/api/login";
 
 extend("required", {
   ...required,
@@ -266,7 +269,7 @@ export default {
       userAccount: "",
       userName: "",
       password: "",
-      repassword: "",
+      rePassword: "",
       captcha: "",
       svg: "",
     };
@@ -279,14 +282,52 @@ export default {
      * 获取图片验证码
      */
     _getCaptcha() {
-      getCaptcha().then((res) => {
+      const sid = this.$store.state.sid;
+
+      getCaptcha(sid).then((res) => {
         if (res.code === 200) {
           this.svg = res.data;
         }
+      }).catch(err => {
+        let data = err.response.data;
+        if (data && data.msg) {
+          this.$alert(data.msg);
+        } else {
+          this.$alert("系统发生错误，请稍后重试或联系管理员.")
+        }
       });
     },
-    reg() {
-      console.log("test.")
+    async reg() {
+      let isValid = await this.$refs.regForm.validate();
+      if (!isValid) {
+        return;
+      }
+      let data = {
+        userAccount: this.userAccount,
+        userNick: this.userName,
+        password: this.password,
+        code: this.captcha
+      };
+
+      reg(this.$store.state.sid, data).then(res => {
+        if (res.code === 200) {
+          this.$alert("注册成功!", () => {
+            console.log("heel");
+          });
+        } else if (res.code === -5) {
+          console.log(res);
+          this.$refs.regForm.setErrors(res.msg);
+        } else {
+          this.$alert(res.msg);
+        }
+      }).catch(err => {
+        let data = err.response.data;
+        if (data && data.msg) {
+          this.$alert(data.msg);
+        } else {
+          this.$alert("系统发生错误，请稍后重试或联系管理员.")
+        }
+      });
     }
   },
 };
